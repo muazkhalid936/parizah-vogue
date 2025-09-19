@@ -15,6 +15,7 @@ import { ArrowLeft, X, Upload, Plus } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "sonner"
 import Link from "next/link"
+import { ImageUpload } from "@/components/image-upload"
 
 const categories = ["Casual", "Formal", "Evening", "Summer", "Winter", "Accessories", "Shoes", "Bags"]
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"]
@@ -143,20 +144,10 @@ export function ProductForm() {
     }))
   }
 
-  const addImageUrl = () => {
-    const url = prompt("Enter image URL:")
-    if (url) {
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, url],
-      }))
-    }
-  }
-
-  const removeImage = (index: number) => {
+  const handleImagesChange = (images: string[]) => {
     setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index),
+      images
     }))
   }
 
@@ -349,39 +340,13 @@ export function ProductForm() {
               <CardHeader>
                 <CardTitle>Product Images</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                        <img
-                          src={image || "/placeholder.svg"}
-                          alt={`Product image ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="aspect-square flex-col gap-2 bg-transparent"
-                    onClick={addImageUrl}
-                  >
-                    <Upload className="h-6 w-6" />
-                    Add Image
-                  </Button>
-                </div>
+              <CardContent>
+                <ImageUpload
+                  images={formData.images}
+                  onImagesChange={handleImagesChange}
+                  maxImages={10}
+                  disabled={isLoading}
+                />
               </CardContent>
             </Card>
           </div>
