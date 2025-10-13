@@ -93,14 +93,14 @@ export function ImageUpload({
     const newImages = images.filter((_, i) => i !== index)
     onImagesChange(newImages)
 
-    // Try to delete from server (optional - for cleanup)
+    // Try to delete from Cloudinary (optional - for cleanup)
     try {
-      // Extract file path from URL if it's from Supabase
+      // Extract public ID from Cloudinary URL
       const urlParts = imageUrl.split('/')
-      const fileName = urlParts[urlParts.length - 1]
-      const filePath = `products/${fileName}`
+      const filename = urlParts[urlParts.length - 1]
+      const publicId = `parizah-vogue/products/${filename.split('.')[0]}`
 
-      await fetch(`/api/upload?path=${encodeURIComponent(filePath)}`, {
+      await fetch(`/api/upload?publicId=${encodeURIComponent(publicId)}`, {
         method: 'DELETE',
         credentials: 'include'
       })

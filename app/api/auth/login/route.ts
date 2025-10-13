@@ -17,6 +17,39 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Check for hardcoded admin credentials
+    if (email.toLowerCase() === 'admin@parizahvogue.com' && password === 'admin123') {
+      const adminToken = generateToken({
+        userId: 'admin',
+        email: 'admin@parizahvogue.com',
+        role: 'admin'
+      });
+      
+      const adminUser = {
+        _id: 'admin',
+        name: 'Admin',
+        email: 'admin@parizahvogue.com',
+        role: 'admin',
+        avatar: ''
+      };
+      
+      const response = NextResponse.json({
+        message: 'Admin login successful',
+        user: adminUser,
+        token: adminToken
+      });
+      
+      // Set HTTP-only cookie for admin
+      response.cookies.set('token', adminToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      });
+      
+      return response;
+    }
+    
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {

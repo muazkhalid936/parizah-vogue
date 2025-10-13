@@ -20,6 +20,7 @@ interface AuthContextType {
   openLoginModal: () => void
   closeLoginModal: () => void
   isLoginModalOpen: boolean
+  isAdmin: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -135,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         openLoginModal,
         closeLoginModal,
         isLoginModalOpen,
+        isAdmin: user?.role === 'admin',
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
 import { getUserFromRequest } from '@/lib/auth';
+import cloudinary from '@/lib/cloudinary';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,39 +44,36 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const fileExtension = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
-    const filePath = `products/${fileName}`;
 
     // Convert File to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = new Uint8Array(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabaseAdmin.storage
-      .from('product-images')
-      .upload(filePath, buffer, {
-        contentType: file.type,
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (error) {
-      console.error('Supabase upload error:', error);
-      return NextResponse.json(
-        { error: 'Failed to upload image' },
-        { status: 500 }
-      );
-    }
-
-    // Get public URL
-    const { data: urlData } = supabaseAdmin.storage
-      .from('product-images')
-      .getPublicUrl(filePath);
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'parizah-vogue/products',
+          public_id: fileName.split('.')[0], // Use filename without extension as public_id
+          resource_type: 'auto',
+          transformation: [
+            { width: 800, height: 800, crop: 'limit' },
+            { quality: 'auto' },
+            { format: 'auto' }
+          ]
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(buffer);
+    });
 
     return NextResponse.json({
       message: 'Image uploaded successfully',
-      url: urlData.publicUrl,
-      fileName: fileName,
-      filePath: filePath
+      url: (result as any).secure_url,
+      publicId: (result as any).public_id,
+      fileName: fileName
     });
 
   } catch (error) {
@@ -100,27 +97,17 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const filePath = searchParams.get('path');
+    const publicId = searchParams.get('publicId');
 
-    if (!filePath) {
+    if (!publicId) {
       return NextResponse.json(
-        { error: 'File path is required' },
+        { error: 'Public ID is required' },
         { status: 400 }
       );
     }
 
-    // Delete from Supabase Storage
-    const { error } = await supabaseAdmin.storage
-      .from('product-images')
-      .remove([filePath]);
-
-    if (error) {
-      console.error('Supabase delete error:', error);
-      return NextResponse.json(
-        { error: 'Failed to delete image' },
-        { status: 500 }
-      );
-    }
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(publicId);
 
     return NextResponse.json({
       message: 'Image deleted successfully'

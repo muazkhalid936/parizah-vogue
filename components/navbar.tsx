@@ -166,12 +166,13 @@ export function Navbar() {
                 </Button>
               </div>
             ) : (
-              <Button 
-                className="elegant-button text-sm px-6"
-                onClick={openLoginModal}
-              >
-                Login
-              </Button>
+              <Link href="/auth">
+                <Button 
+                  className="elegant-button text-sm px-6"
+                >
+                  Login
+                </Button>
+              </Link>
             )}
           </div>
         </div>

@@ -16,6 +16,21 @@ export async function GET(request: NextRequest) {
       );
     }
     
+    // Handle admin user
+    if (tokenPayload.userId === 'admin' && tokenPayload.role === 'admin') {
+      const adminUser = {
+        _id: 'admin',
+        name: 'Admin',
+        email: 'admin@parizahvogue.com',
+        role: 'admin',
+        avatar: ''
+      };
+      
+      return NextResponse.json({
+        user: adminUser
+      });
+    }
+    
     // Find user in database
     const user = await User.findById(tokenPayload.userId);
     if (!user) {
