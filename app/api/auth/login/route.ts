@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
 import { generateToken } from '@/lib/auth';
+import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,14 +20,17 @@ export async function POST(request: NextRequest) {
     
     // Check for hardcoded admin credentials
     if (email.toLowerCase() === 'admin@parizahvogue.com' && password === 'admin123') {
+      // Generate a consistent ObjectId for admin user
+      const adminObjectId = new mongoose.Types.ObjectId('507f1f77bcf86cd799439011');
+      
       const adminToken = generateToken({
-        userId: 'admin',
+        userId: adminObjectId.toString(),
         email: 'admin@parizahvogue.com',
         role: 'admin'
       });
       
       const adminUser = {
-        _id: 'admin',
+        _id: adminObjectId.toString(),
         name: 'Admin',
         email: 'admin@parizahvogue.com',
         role: 'admin',

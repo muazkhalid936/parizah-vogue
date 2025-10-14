@@ -16,6 +16,19 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Admin users don't need a cart, return empty cart
+    if (tokenPayload.role === 'admin') {
+      return NextResponse.json({ 
+        cart: {
+          _id: null,
+          user: tokenPayload.userId,
+          items: [],
+          totalItems: 0,
+          totalPrice: 0
+        }
+      });
+    }
     
     let cart = await Cart.findOne({ user: tokenPayload.userId }).populate('items.product');
     
@@ -51,6 +64,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    // Admin users don't have carts
+    if (tokenPayload.role === 'admin') {
+      return NextResponse.json(
+        { error: 'Admin users cannot add items to cart' },
+        { status: 403 }
       );
     }
     
@@ -153,6 +174,13 @@ export async function DELETE(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       );
+    }
+
+    // Admin users don't have carts
+    if (tokenPayload.role === 'admin') {
+      return NextResponse.json({
+        message: 'Admin users do not have carts to clear'
+      });
     }
     
     await Cart.findOneAndUpdate(

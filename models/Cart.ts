@@ -51,8 +51,7 @@ const CartSchema = new Schema<ICart>(
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'User is required'],
-      unique: true
+      required: [true, 'User is required']
     },
     items: {
       type: [CartItemSchema],
@@ -74,8 +73,8 @@ const CartSchema = new Schema<ICart>(
   }
 );
 
-// Index for faster queries
-CartSchema.index({ user: 1 });
+// Add indexes
+CartSchema.index({ user: 1 }, { unique: true });
 CartSchema.index({ 'items.product': 1 });
 
 // Method to calculate totals
@@ -88,17 +87,6 @@ CartSchema.methods.calculateTotals = function() {
 CartSchema.pre('save', function(next) {
   this.calculateTotals();
   next();
-});
-
-// Prevent duplicate items with same product, size, and color
-CartSchema.index({ 
-  user: 1, 
-  'items.product': 1, 
-  'items.size': 1, 
-  'items.color': 1 
-}, { 
-  unique: true, 
-  sparse: true 
 });
 
 const Cart = mongoose.models.Cart || mongoose.model<ICart>('Cart', CartSchema);

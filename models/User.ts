@@ -39,7 +39,6 @@ const UserSchema = new Schema<IUser>(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      unique: true,
       lowercase: true,
       trim: true,
       match: [
@@ -73,8 +72,8 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-// Index for faster queries
-UserSchema.index({ email: 1 });
+// Index for faster queries and uniqueness
+UserSchema.index({ email: 1 }, { unique: true });
 
 // Hash password before saving
 UserSchema.pre('save', async function (next) {
