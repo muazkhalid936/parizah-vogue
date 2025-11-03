@@ -1,44 +1,26 @@
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken"
+import { jwtVerify } from "jose"
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
-if (!JWT_SECRET) {
-  throw new Error(
-    "Please define the JWT_SECRET environment variable inside .env"
-  );
+export function generateToken(userId: string, role: string) {
+  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: "7d" })
 }
 
-export interface TokenPayload {
-  userId: string;
-  email: string;
-  role: string;
-}
-
-export const hashPassword = async (password: string): Promise<string> => {
-  const salt = await bcrypt.genSalt(12);
-  return bcrypt.hash(password, salt);
-};
-
-export const comparePassword = async (
-  password: string,
-  hashedPassword: string
-): Promise<boolean> => {
-  return bcrypt.compare(password, hashedPassword);
-};
-
-export const generateToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
-};
-
-export const verifyToken = (token: string): TokenPayload | null => {
+export async function verifyToken(token: string) {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const secret = new TextEncoder().encode(JWT_SECRET)
+    const verified = await jwtVerify(token, secret)
+    return verified.payload
   } catch (error) {
-    return null;
+    return null
   }
-};
+}
 
-export const generateRefreshToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
-};
+export function getTokenFromRequest(request: Request) {
+  const authHeader = request.headers.get("authorization")
+  if (!authHeader?.startsWith("Bearer ")) {
+    return null
+  }
+  return authHeader.substring(7)
+}

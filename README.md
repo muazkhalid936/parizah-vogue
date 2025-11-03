@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Parizah Vogue - Fashion E-Commerce Platform
 
-## Getting Started
+A complete fashion e-commerce website for selling ladies' dresses online with an elegant gold and black luxury brand aesthetic.
 
-First, run the development server:
+## Features
 
-```bash
+### User Features
+- **Homepage** - Hero section with featured products and category highlights
+- **Shop Page** - Browse all products with filters (price, category)
+- **Product Details** - View detailed product information with size and quantity selection
+- **Authentication** - User signup and login with JWT
+- **Shopping Cart** - Add/remove products and checkout
+- **Order History** - View all orders with real-time status updates
+
+### Admin Features
+- **Product Management** - Add, edit, and delete products
+- **Order Management** - View all customer orders and update status (Pending → Confirmed → Delivered)
+- **Admin Dashboard** - Comprehensive admin panel for managing the store
+
+## Tech Stack
+
+### Frontend
+- Next.js 16 (App Router)
+- TailwindCSS v4
+- React 19
+- Responsive design
+
+### Backend
+- Next.js API Routes
+- MongoDB with Mongoose
+- JWT Authentication
+- bcryptjs for password hashing
+
+### Services
+- Cloudinary for image storage
+- MongoDB Atlas for database
+
+## Setup Instructions
+
+### 1. Environment Variables
+Create a `.env.local` file with:
+
+\`\`\`env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+\`\`\`
+
+### 2. Install Dependencies
+\`\`\`bash
+npm install
+\`\`\`
+
+### 3. Run Development Server
+\`\`\`bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+\`\`\`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Test Accounts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Admin Login:**
+- Email: admin@parizah.com
+- Password: admin123
 
-## Learn More
+### 5. Database Setup
 
-To learn more about Next.js, take a look at the following resources:
+Create a MongoDB database and update the connection string in `.env.local`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+\`\`\`
+src/
+├── app/
+│   ├── page.tsx (Home)
+│   ├── shop/ (Product listing)
+│   ├── product/[id]/ (Product details)
+│   ├── cart/ (Shopping cart)
+│   ├── orders/ (Order history)
+│   ├── login/ (Auth)
+│   ├── admin/ (Admin dashboard)
+│   └── api/ (Backend routes)
+├── components/
+│   ├── navbar.tsx
+│   └── ui/ (UI components)
+├── lib/
+│   ├── db.ts (MongoDB connection)
+│   ├── models/ (Mongoose schemas)
+│   ├── auth.ts (JWT utilities)
+│   └── cloudinary.ts (Image upload)
+└── globals.css (Tailwind & theme)
+\`\`\`
 
-## Deploy on Vercel
+## Key Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Elegant Design** - Gold (#d4af37) and black (#1a1a1a) luxury theme
+- **Responsive** - Mobile-first design that works on all devices
+- **Secure** - JWT authentication, password hashing, role-based access
+- **Scalable** - MongoDB for flexible data storage
+- **Professional** - Clean UI with smooth transitions and hover effects
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+Deploy to Vercel:
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Add environment variables
+4. Deploy!
+
+## Support
+
+For issues or questions, please create an issue in the repository.

@@ -1,42 +1,37 @@
-import { v2 as cloudinary } from 'cloudinary';
+// Cloudinary integration for image uploads
+// This utility can be used in the admin dashboard for uploading product images
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-export const uploadToCloudinary = async (file: File): Promise<string> => {
-  try {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          resource_type: 'auto',
-          folder: 'parizah-vogue',
-        },
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result?.secure_url || '');
-          }
-        }
-      ).end(buffer);
-    });
-  } catch (error) {
-    throw new Error('Failed to upload image');
+export async function uploadToCloudinary(file: File) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  
+  if (!cloudName) {
+    throw new Error("Cloudinary cloud name is not configured")
   }
-};
 
-export const deleteFromCloudinary = async (publicId: string): Promise<void> => {
+  const formData = new FormData()
+  formData.append("file", file)
+  formData.append("upload_preset", "parizah") // Custom preset - needs to be created in Cloudinary dashboard
+
   try {
-    await cloudinary.uploader.destroy(publicId);
-  } catch (error) {
-    throw new Error('Failed to delete image');
-  }
-};
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    )
 
-export default cloudinary;
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error("Cloudinary upload failed:", errorData)
+      throw new Error(`Upload failed: ${errorData.error?.message || 'Unknown error'}`)
+    }
+
+    const data = await response.json()
+    console.log("Upload successful:", data.secure_url)
+    return data.secure_url
+  } catch (error) {
+    console.error("Error uploading to Cloudinary:", error)
+    throw error
+  }
+}
