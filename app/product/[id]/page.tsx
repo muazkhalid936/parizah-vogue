@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import ProductImageGallery from "@/components/product-image-gallery"
 
 interface Product {
   _id: string
   name: string
   description: string
   price: number
-  category: string
+  category: "stitched" | "unstitched" | "party"
   sizes: string[]
   stock: number
   images: string[]
@@ -88,18 +89,16 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Images */}
           <div>
-            <div
-              className="h-96 md:h-[500px] bg-muted rounded-lg mb-4"
-              style={{
-                backgroundImage: `url('${product.images[0]}')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
+            <ProductImageGallery images={product.images} productName={product.name} />
           </div>
 
           {/* Details */}
           <div>
+            <div className="mb-4">
+              <span className="inline-block px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full capitalize">
+                {product.category}
+              </span>
+            </div>
             <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
             <p className="text-3xl text-primary font-bold mb-6">${product.price}</p>
             <p className="text-muted-foreground mb-8 leading-relaxed">{product.description}</p>

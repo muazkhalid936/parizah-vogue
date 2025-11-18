@@ -5,11 +5,15 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
 interface Product {
-  id: number
+  _id: string
   name: string
   price: number
-  category: string
-  image?: string
+  category: "stitched" | "unstitched" | "party" | string
+  images?: string[]
+  description?: string
+  sizes?: string[]
+  stock?: number
+  featured?: boolean
 }
 
 export default function Shop() {
@@ -75,7 +79,7 @@ export default function Shop() {
               <div className="mb-6">
                 <h4 className="font-medium mb-3">Category</h4>
                 <div className="space-y-2">
-                  {["casual", "formal", "party"].map((cat) => (
+                  {["stitched", "unstitched", "party"].map((cat) => (
                     <label key={cat} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
@@ -126,21 +130,26 @@ export default function Shop() {
                     key={product.id}
                     className="bg-card border border-border rounded overflow-hidden hover:shadow-lg transition"
                   >
-                    <div
-                      className="h-64 bg-muted"
-                      style={{
-                        backgroundImage: `url(/placeholder.svg?height=256&width=256&query=${product.image})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                    />
+                    <div className="h-64 bg-muted">
+                      {product.images && product.images.length > 0 ? (
+                        <div
+                          className="h-64 w-full bg-center bg-cover"
+                          style={{ backgroundImage: `url('${product.images[0]}')` }}
+                        />
+                      ) : (
+                        <div
+                          className="h-64 w-full bg-center bg-cover"
+                          style={{ backgroundImage: `url('/placeholder.svg?height=256&width=256')` }}
+                        />
+                      )}
+                    </div>
                     <div className="p-6">
                       <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
                       <p className="text-muted-foreground text-sm mb-4 capitalize">{product.category}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold text-primary">${product.price}</span>
                         <Link
-                          href={`/product/${product.id}`}
+                          href={`/product/${product._id}`}
                           className="bg-secondary text-secondary-foreground px-4 py-2 rounded hover:bg-primary hover:text-primary-foreground transition text-sm"
                         >
                           View

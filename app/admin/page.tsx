@@ -1,15 +1,26 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { uploadToCloudinary } from "@/lib/cloudinary"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Plus, Edit, Trash2, Upload, X, Menu, LogOut, Package, ShoppingCart, Image as ImageIcon } from "lucide-react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export default function AdminDashboard() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("products")
   const [user, setUser] = useState<any>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
@@ -27,7 +38,7 @@ export default function AdminDashboard() {
     }
 
     setUser(userData)
-  }, [])
+  }, [router])
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -36,47 +47,98 @@ export default function AdminDashboard() {
   }
 
   if (!user) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    )
   }
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      <div className="p-6 border-b">
+        <h1 className="text-2xl font-bold text-primary">Parizah Admin</h1>
+      </div>
+
+      <nav className="flex-1 p-6">
+        <div className="space-y-2">
+          <Button
+            variant={activeTab === "products" ? "default" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => {
+              setActiveTab("products")
+              setSidebarOpen(false)
+            }}
+          >
+            <Package className="mr-2 h-4 w-4" />
+            Products
+          </Button>
+          <Button
+            variant={activeTab === "orders" ? "default" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => {
+              setActiveTab("orders")
+              setSidebarOpen(false)
+            }}
+          >
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Orders
+          </Button>
+        </div>
+      </nav>
+
+      <div className="p-6 border-t">
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
+      </div>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-secondary text-secondary-foreground p-6 min-h-screen">
-          <h1 className="text-2xl font-bold mb-8 text-primary">Parizah Admin</h1>
-
-          <nav className="space-y-2 mb-8">
-            <button
-              onClick={() => setActiveTab("products")}
-              className={`w-full text-left px-4 py-3 rounded transition ${
-                activeTab === "products" ? "bg-primary text-primary-foreground" : "hover:bg-secondary-foreground/10"
-              }`}
-            >
-              Products
-            </button>
-            <button
-              onClick={() => setActiveTab("orders")}
-              className={`w-full text-left px-4 py-3 rounded transition ${
-                activeTab === "orders" ? "bg-primary text-primary-foreground" : "hover:bg-secondary-foreground/10"
-              }`}
-            >
-              Orders
-            </button>
-          </nav>
-
-          <button
-            onClick={handleLogout}
-            className="w-full px-4 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition"
-          >
-            Logout
-          </button>
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block w-64 bg-card border-r">
+          <SidebarContent />
         </div>
 
+        {/* Mobile Sidebar */}
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <div className="lg:hidden">
+            <div className="flex items-center justify-between p-4 border-b bg-card">
+              <h1 className="text-xl font-bold text-primary">Parizah Admin</h1>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+            </div>
+          </div>
+          <SheetContent side="left" className="p-0 w-64">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+
         {/* Main Content */}
-        <div className="flex-1 p-8">
-          {activeTab === "products" && <AdminProducts />}
-          {activeTab === "orders" && <AdminOrders />}
+        <div className="flex-1 p-4 lg:p-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+              <TabsTrigger value="products">Products</TabsTrigger>
+              <TabsTrigger value="orders">Orders</TabsTrigger>
+            </TabsList>
+            <TabsContent value="products" className="mt-6">
+              <AdminProducts />
+            </TabsContent>
+            <TabsContent value="orders" className="mt-6">
+              <AdminOrders />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
@@ -84,6 +146,7 @@ export default function AdminDashboard() {
 }
 
 function AdminProducts() {
+  const { toast } = useToast()
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -92,12 +155,16 @@ function AdminProducts() {
     name: "",
     description: "",
     price: "",
-    category: "casual",
+    category: "unstitched",
     stock: "",
-    images: "",
+    featured: false,
+    isNew: false,
+    trending: false,
   })
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     fetchProducts()
@@ -109,50 +176,101 @@ function AdminProducts() {
       if (response.ok) {
         const data = await response.json()
         setProducts(data)
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch products",
+          variant: "destructive",
+        })
       }
     } catch (err) {
-      console.error("Error fetching products:", err)
+      toast({
+        title: "Error",
+        description: "Failed to fetch products",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleCategoryChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, category: value }))
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
+    const files = Array.from(e.target.files || [])
+    if (files.length > 5) {
+      toast({
+        title: "Too many files",
+        description: "You can upload a maximum of 5 images",
+        variant: "destructive",
+      })
+      return
     }
+    setSelectedFiles(files)
+  }
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!formData.name.trim() || !formData.description.trim() || !formData.price || !formData.stock) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (selectedFiles.length === 0 && !editingId) {
+      toast({
+        title: "Validation Error",
+        description: "Please select at least one image",
+        variant: "destructive",
+      })
+      return
+    }
+
     setUploading(true)
 
     try {
-      let imageUrl = formData.images
+      let imageUrls: string[] = []
       
-      // Upload image to Cloudinary if a file is selected
-      if (selectedFile) {
-        console.log("Uploading file to Cloudinary:", selectedFile.name)
-        try {
-          imageUrl = await uploadToCloudinary(selectedFile)
-          console.log("Upload successful, URL:", imageUrl)
-        } catch (uploadError) {
-          console.error("Cloudinary upload failed:", uploadError)
-          alert(`Image upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`)
-          setUploading(false)
-          return
-        }
+      // Upload images to Cloudinary if files are selected
+      if (selectedFiles.length > 0) {
+        toast({
+          title: "Uploading images...",
+          description: `Uploading ${selectedFiles.length} image(s)`,
+        })
+
+        const uploadPromises = selectedFiles.map(file => uploadToCloudinary(file))
+        imageUrls = await Promise.all(uploadPromises)
       }
 
       const endpoint = editingId ? `/api/products/${editingId}` : "/api/products"
       const method = editingId ? "PUT" : "POST"
       const token = localStorage.getItem("token")
+
+      const payload: any = {
+        ...formData,
+        price: Number.parseFloat(formData.price),
+        stock: Number.parseInt(formData.stock),
+      }
+
+      // Only update images if new ones were uploaded
+      if (imageUrls.length > 0) {
+        payload.images = imageUrls
+      }
 
       const response = await fetch(endpoint, {
         method,
@@ -160,31 +278,40 @@ function AdminProducts() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...formData,
-          price: Number.parseFloat(formData.price),
-          stock: Number.parseInt(formData.stock),
-          images: [imageUrl || "/placeholder.svg?key=dress1"],
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (response.ok) {
-        alert(editingId ? "Product updated!" : "Product created!")
-        setFormData({ name: "", description: "", price: "", category: "casual", stock: "", images: "" })
-        setSelectedFile(null)
-        setEditingId(null)
-        setShowForm(false)
+        toast({
+          title: "Success",
+          description: editingId ? "Product updated successfully!" : "Product created successfully!",
+        })
+        resetForm()
         fetchProducts()
       } else {
         const errorData = await response.json()
-        alert(`Error saving product: ${errorData.message || 'Unknown error'}`)
+        toast({
+          title: "Error",
+          description: errorData.error || "Failed to save product",
+          variant: "destructive",
+        })
       }
     } catch (err) {
-      console.error("Error in handleSubmit:", err)
-      alert(`Error saving product: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to save product",
+        variant: "destructive",
+      })
     } finally {
       setUploading(false)
     }
+  }
+
+  const resetForm = () => {
+    setFormData({ name: "", description: "", price: "", category: "unstitched", stock: "", featured: false, isNew: false, trending: false })
+    setSelectedFiles([])
+    setEditingId(null)
+    setShowForm(false)
   }
 
   const handleEdit = (product: any) => {
@@ -194,156 +321,369 @@ function AdminProducts() {
       price: product.price.toString(),
       category: product.category,
       stock: product.stock.toString(),
-      images: product.images?.[0] || "",
+      featured: product.featured || false,
+      isNew: product.isNew || false,
+      trending: product.trending || false,
     })
     setEditingId(product._id)
     setShowForm(true)
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return
+  const handleDeleteClick = (id: string) => {
+    setProductToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return
 
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(`/api/products/${productToDelete}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       })
 
       if (response.ok) {
-        alert("Product deleted!")
+        toast({
+          title: "Success",
+          description: "Product deleted successfully!",
+        })
         fetchProducts()
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete product",
+          variant: "destructive",
+        })
       }
     } catch (err) {
-      alert("Error deleting product")
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleteDialogOpen(false)
+      setProductToDelete(null)
     }
   }
 
-  if (loading) return <div>Loading products...</div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    )
+  }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold">Products</h2>
-        <button
-          onClick={() => {
-            setShowForm(!showForm)
-            setEditingId(null)
-            setSelectedFile(null)
-            setFormData({ name: "", description: "", price: "", category: "casual", stock: "", images: "" })
-          }}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-accent transition"
-        >
-          {showForm ? "Cancel" : "Add Product"}
-        </button>
-      </div>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold">Products</h2>
+          <p className="text-muted-foreground">Manage your product catalog</p>
+        </div>
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogTrigger asChild>
+            <Button onClick={() => resetForm()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Product
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingId ? "Edit Product" : "Add New Product"}</DialogTitle>
+              <DialogDescription>
+                {editingId ? "Update product details" : "Fill in the product information"}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Product Name *</label>
+                  <Input
+                    name="name"
+                    placeholder="Product Name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Price *</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    name="price"
+                    placeholder="0.00"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Stock *</label>
+                  <Input
+                    type="number"
+                    name="stock"
+                    placeholder="0"
+                    value={formData.stock}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Category *</label>
+                  <Select value={formData.category} onValueChange={handleCategoryChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="stitched">Stitched</SelectItem>
+                      <SelectItem value="unstitched">Unstitched</SelectItem>
+                      <SelectItem value="party">Party</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description *</label>
+                <Textarea
+                  name="description"
+                  placeholder="Product description..."
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={3}
+                  required
+                />
+              </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Product Name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="px-4 py-2 border border-border rounded bg-input"
-              required
-            />
-            <input
-              type="number"
-              name="price"
-              placeholder="Price"
-              value={formData.price}
-              onChange={handleInputChange}
-              className="px-4 py-2 border border-border rounded bg-input"
-              required
-            />
-            <input
-              type="number"
-              name="stock"
-              placeholder="Stock"
-              value={formData.stock}
-              onChange={handleInputChange}
-              className="px-4 py-2 border border-border rounded bg-input"
-              required
-            />
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-              className="px-4 py-2 border border-border rounded bg-input"
-            >
-              <option value="casual">Casual</option>
-              <option value="formal">Formal</option>
-              <option value="party">Party</option>
-            </select>
-          </div>
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-border rounded bg-input mb-4"
-            rows={3}
-            required
-          />
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Product Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full px-4 py-2 border border-border rounded bg-input"
-            />
-            {selectedFile && (
-              <p className="text-sm text-muted-foreground mt-2">Selected: {selectedFile.name}</p>
-            )}
-          </div>
-          <button
-            type="submit"
-            disabled={uploading}
-            className="bg-primary text-primary-foreground px-6 py-2 rounded hover:bg-accent transition disabled:opacity-50"
-          >
-            {uploading ? "Uploading..." : editingId ? "Update Product" : "Create Product"}
-          </button>
-        </form>
-      )}
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Product Tags</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="featured"
+                      checked={formData.featured}
+                      onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm">Featured</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="isNew"
+                      checked={formData.isNew}
+                      onChange={(e) => setFormData({ ...formData, isNew: e.target.checked })}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm">New Collection</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="trending"
+                      checked={formData.trending}
+                      onChange={(e) => setFormData({ ...formData, trending: e.target.checked })}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm">Trending</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Product Images (1-5 images)</label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="cursor-pointer flex flex-col items-center justify-center space-y-2 text-center"
+                  >
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium text-primary hover:underline">Click to upload</span> or drag and drop
+                    </div>
+                    <div className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 10MB each</div>
+                  </label>
+                </div>
+                
+                {selectedFiles.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
+                    {selectedFiles.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                          <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => removeFile(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <p className="text-xs text-center mt-1 truncate">{file.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={resetForm}
+                  disabled={uploading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={uploading}>
+                  {uploading ? (
+                    <>
+                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                      {selectedFiles.length > 0 ? "Uploading..." : "Saving..."}
+                    </>
+                  ) : (
+                    editingId ? "Update Product" : "Create Product"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <div className="grid gap-4">
-        {products.map((product) => (
-          <div key={product._id} className="bg-card border border-border rounded p-6 flex items-center justify-between">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold">{product.name}</h3>
-              <p className="text-muted-foreground text-sm mb-2">{product.description}</p>
-              <div className="flex gap-4 text-sm">
-                <span className="font-medium">${product.price}</span>
-                <span className="text-muted-foreground">Stock: {product.stock}</span>
-                <span className="text-muted-foreground capitalize">{product.category}</span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleEdit(product)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(product._id)}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+        {products.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Package className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No products yet</h3>
+              <p className="text-muted-foreground mb-4">Get started by adding your first product</p>
+              <Button onClick={() => setShowForm(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Product
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          products.map((product) => (
+            <Card key={product._id}>
+              <CardContent className="p-6">
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Product Image */}
+                  <div className="w-full lg:w-24 h-24 bg-muted rounded-lg shrink-0">
+                    {product.images && product.images[0] ? (
+                      <div
+                        className="w-full h-full rounded-lg bg-cover bg-center"
+                        style={{ backgroundImage: `url('${product.images[0]}')` }}
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-lg flex items-center justify-center">
+                        <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                      <h3 className="text-lg font-semibold truncate">{product.name}</h3>
+                      <div className="flex gap-2 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteClick(product._id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                      {product.description}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 items-center">
+                      <Badge variant="secondary" className="font-medium">
+                        ${product.price}
+                      </Badge>
+                      <Badge variant="outline">
+                        Stock: {product.stock}
+                      </Badge>
+                      <Badge variant="outline" className="capitalize">
+                        {product.category}
+                      </Badge>
+                      {product.images && (
+                        <Badge variant="outline">
+                          {product.images.length} image{product.images.length !== 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this product? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
 function AdminOrders() {
+  const { toast } = useToast()
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -361,9 +701,19 @@ function AdminOrders() {
       if (response.ok) {
         const data = await response.json()
         setOrders(data)
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch orders",
+          variant: "destructive",
+        })
       }
     } catch (err) {
-      console.error("Error fetching orders:", err)
+      toast({
+        title: "Error",
+        description: "Failed to fetch orders",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -382,74 +732,105 @@ function AdminOrders() {
       })
 
       if (response.ok) {
-        alert("Order status updated!")
+        toast({
+          title: "Success",
+          description: "Order status updated successfully!",
+        })
         fetchOrders()
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update order status",
+          variant: "destructive",
+        })
       }
     } catch (err) {
-      alert("Error updating order")
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive",
+      })
     }
   }
 
-  if (loading) return <div>Loading orders...</div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    )
+  }
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold mb-8">Orders</h2>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold">Orders</h2>
+        <p className="text-muted-foreground">Manage customer orders</p>
+      </div>
 
       <div className="space-y-4">
         {orders.length === 0 ? (
-          <p className="text-muted-foreground">No orders yet.</p>
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
+              <p className="text-muted-foreground">Orders will appear here when customers make purchases</p>
+            </CardContent>
+          </Card>
         ) : (
           orders.map((order) => (
-            <div key={order._id} className="bg-card border border-border rounded p-6">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Order ID</p>
-                  <p className="font-semibold text-sm truncate">{order._id}</p>
+            <Card key={order._id}>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <CardTitle className="text-sm font-mono">#{order._id.slice(-8)}</CardTitle>
+                    <CardDescription>{order.userId?.name || "Unknown Customer"}</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="font-medium">
+                      ${order.totalPrice.toFixed(2)}
+                    </Badge>
+                    <Select
+                      value={order.status}
+                      onValueChange={(value) => handleStatusChange(order._id, value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="Confirmed">Confirmed</SelectItem>
+                        <SelectItem value="Delivered">Delivered</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Customer</p>
-                  <p className="font-semibold">{order.userId?.name || "Unknown"}</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Location</p>
+                    <p className="text-sm">{order.location}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Order Date</p>
+                    <p className="text-sm">{new Date(order.createdAt).toLocaleDateString()}</p>
+                  </div>
                 </div>
+                
                 <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="font-semibold text-primary">${order.totalPrice.toFixed(2)}</p>
+                  <p className="text-sm font-medium mb-2">Items:</p>
+                  <div className="space-y-1">
+                    {order.items.map((item: any, idx: number) => (
+                      <div key={idx} className="flex justify-between text-sm">
+                        <span>{item.name} × {item.quantity}</span>
+                        <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-semibold text-sm">{order.location}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                    className={`px-3 py-1 rounded font-medium text-sm ${
-                      order.status === "Delivered"
-                        ? "bg-green-100 text-green-700"
-                        : order.status === "Confirmed"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    <option>Pending</option>
-                    <option>Confirmed</option>
-                    <option>Delivered</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-border">
-                <p className="text-sm font-medium mb-2">Items:</p>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  {order.items.map((item: any, idx: number) => (
-                    <li key={idx}>
-                      {item.name} × {item.quantity} - ${(item.price * item.quantity).toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))
         )}
       </div>

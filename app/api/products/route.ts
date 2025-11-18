@@ -8,10 +8,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get("category")
     const featured = searchParams.get("featured")
+    const isNew = searchParams.get("isNew")
+    const trending = searchParams.get("trending")
 
     let query = {}
     if (category) query = { ...query, category }
     if (featured === "true") query = { ...query, featured: true }
+    if (isNew === "true") query = { ...query, isNew: true }
+    if (trending === "true") query = { ...query, trending: true }
 
     const products = await Product.find(query).limit(50)
     return NextResponse.json(products)
@@ -24,7 +28,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDB()
-    const { name, description, price, category, sizes, stock, images, featured } = await request.json()
+    const { name, description, price, category, sizes, stock, images, featured, isNew, trending } = await request.json()
+
+    // Basic server-side validation
+    const allowedCategories = ["stitched", "unstitched", "party"]
+    if (!allowedCategories.includes(category)) {
+      return NextResponse.json({ error: `Invalid category. Allowed: ${allowedCategories.join(', ')}` }, { status: 400 })
+    }
+
+    if (!Array.isArray(images) || images.length < 1 || images.length > 5) {
+      return NextResponse.json({ error: 'Images must be an array with 1 to 5 items' }, { status: 400 })
+    }
 
     const product = await Product.create({
       name,
@@ -35,6 +49,8 @@ export async function POST(request: NextRequest) {
       stock,
       images,
       featured: featured || false,
+      isNew: isNew || false,
+      trending: trending || false,
     })
 
     return NextResponse.json(product, { status: 201 })
