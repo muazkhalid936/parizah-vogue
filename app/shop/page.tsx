@@ -10,6 +10,7 @@ interface Product {
   price: number
   category: "stitched" | "unstitched" | "party" | string
   images?: string[]
+  video?: string
   description?: string
   sizes?: string[]
   stock?: number
@@ -130,7 +131,7 @@ export default function Shop() {
                     key={product.id}
                     className="bg-card border border-border rounded overflow-hidden hover:shadow-lg transition"
                   >
-                    <div className="h-64 bg-muted">
+                    <div className="h-64 bg-muted relative">
                       {product.images && product.images.length > 0 ? (
                         <div
                           className="h-64 w-full bg-center bg-cover"
@@ -141,6 +142,13 @@ export default function Shop() {
                           className="h-64 w-full bg-center bg-cover"
                           style={{ backgroundImage: `url('/placeholder.svg?height=256&width=256')` }}
                         />
+                      )}
+                      {product.video && (
+                        <div className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-1">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 12l-6-4h12l-6 4z"/>
+                          </svg>
+                        </div>
                       )}
                     </div>
                     <div className="p-6">

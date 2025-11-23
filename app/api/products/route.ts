@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDB()
-    const { name, description, price, category, sizes, stock, images, featured, isNew, trending } = await request.json()
+    const { name, description, price, category, sizes, stock, images, video, featured, isNew, trending } = await request.json()
 
     // Basic server-side validation
     const allowedCategories = ["stitched", "unstitched", "party"]
@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       sizes,
       stock,
       images,
+      video,
       featured: featured || false,
       isNew: isNew || false,
       trending: trending || false,

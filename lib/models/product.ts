@@ -8,6 +8,7 @@ export interface IProduct extends Document {
   sizes: string[]
   stock: number
   images: string[]
+  video?: string
   featured: boolean
   isNew: boolean
   trending: boolean
@@ -29,6 +30,7 @@ const ProductSchema = new Schema(
     sizes: { type: [String], default: ["XS", "S", "M", "L", "XL", "XXL"] },
     stock: { type: Number, required: true, default: 0 },
     images: { type: [String], required: true, validate: [arrayLimit, 'Images array must have between 1 and 5 items'] },
+    video: { type: String },
     featured: { type: Boolean, default: false },
     isNew: { type: Boolean, default: false },
     trending: { type: Boolean, default: false },

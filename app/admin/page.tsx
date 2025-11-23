@@ -165,6 +165,7 @@ function AdminProducts() {
   const [uploading, setUploading] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState<File | null>(null)
 
   useEffect(() => {
     fetchProducts()
@@ -220,6 +221,17 @@ function AdminProducts() {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedVideo(file)
+    }
+  }
+
+  const removeVideo = () => {
+    setSelectedVideo(null)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -245,6 +257,7 @@ function AdminProducts() {
 
     try {
       let imageUrls: string[] = []
+      let videoUrl: string | undefined = undefined
       
       // Upload images to Cloudinary if files are selected
       if (selectedFiles.length > 0) {
@@ -255,6 +268,16 @@ function AdminProducts() {
 
         const uploadPromises = selectedFiles.map(file => uploadToCloudinary(file))
         imageUrls = await Promise.all(uploadPromises)
+      }
+
+      // Upload video to Cloudinary if selected
+      if (selectedVideo) {
+        toast({
+          title: "Uploading video...",
+          description: "Uploading video file",
+        })
+
+        videoUrl = await uploadToCloudinary(selectedVideo, 'video')
       }
 
       const endpoint = editingId ? `/api/products/${editingId}` : "/api/products"
@@ -270,6 +293,11 @@ function AdminProducts() {
       // Only update images if new ones were uploaded
       if (imageUrls.length > 0) {
         payload.images = imageUrls
+      }
+
+      // Only update video if a new one was uploaded
+      if (videoUrl) {
+        payload.video = videoUrl
       }
 
       const response = await fetch(endpoint, {
@@ -310,6 +338,7 @@ function AdminProducts() {
   const resetForm = () => {
     setFormData({ name: "", description: "", price: "", category: "unstitched", stock: "", featured: false, isNew: false, trending: false })
     setSelectedFiles([])
+    setSelectedVideo(null)
     setEditingId(null)
     setShowForm(false)
   }
@@ -544,6 +573,56 @@ function AdminProducts() {
                 )}
               </div>
 
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Product Video (optional)</label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6">
+                  <Input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="hidden"
+                    id="video-upload"
+                  />
+                  <label
+                    htmlFor="video-upload"
+                    className="cursor-pointer flex flex-col items-center justify-center space-y-2 text-center"
+                  >
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium text-primary hover:underline">Click to upload</span> or drag and drop
+                    </div>
+                    <div className="text-xs text-muted-foreground">MP4, MOV, AVI up to 100MB</div>
+                  </label>
+                </div>
+                
+                {selectedVideo && (
+                  <div className="relative group mt-4">
+                    <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">Video selected</p>
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={removeVideo}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-center mt-1 truncate">{selectedVideo.name}</p>
+                  </div>
+                )}
+              </div>
+
               <DialogFooter className="flex flex-col sm:flex-row gap-2">
                 <Button
                   type="button"
@@ -642,6 +721,11 @@ function AdminProducts() {
                       {product.images && (
                         <Badge variant="outline">
                           {product.images.length} image{product.images.length !== 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                      {product.video && (
+                        <Badge variant="outline">
+                          Video
                         </Badge>
                       )}
                     </div>

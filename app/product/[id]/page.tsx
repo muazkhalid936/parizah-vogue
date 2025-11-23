@@ -14,6 +14,7 @@ interface Product {
   sizes: string[]
   stock: number
   images: string[]
+  video?: string
   featured: boolean
   createdAt: string
   updatedAt: string
@@ -89,7 +90,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Images */}
           <div>
-            <ProductImageGallery images={product.images} productName={product.name} />
+            <ProductImageGallery images={product.images} productName={product.name} video={product.video} />
           </div>
 
           {/* Details */}

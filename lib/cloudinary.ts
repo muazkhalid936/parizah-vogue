@@ -1,7 +1,7 @@
-// Cloudinary integration for image uploads
-// This utility can be used in the admin dashboard for uploading product images
+// Cloudinary integration for image and video uploads
+// This utility can be used in the admin dashboard for uploading product images and videos
 
-export async function uploadToCloudinary(file: File) {
+export async function uploadToCloudinary(file: File, type: 'image' | 'video' = 'image') {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
   
   if (!cloudName) {
@@ -14,7 +14,7 @@ export async function uploadToCloudinary(file: File) {
 
   try {
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudName}/${type}/upload`,
       {
         method: "POST",
         body: formData,
