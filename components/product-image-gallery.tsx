@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import ImageViewerModal from "@/components/image-viewer-modal"
 
 interface ProductImageGalleryProps {
   images: string[]
@@ -11,6 +12,10 @@ interface ProductImageGalleryProps {
 
 export default function ProductImageGallery({ images, productName, video }: ProductImageGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  
+  const openModal = () => setIsModalOpen(true)
+  const closeModal = () => setIsModalOpen(false)
   
   // Combine images and video into a media array
   const mediaItems = []
@@ -33,24 +38,33 @@ export default function ProductImageGallery({ images, productName, video }: Prod
   return (
     <div className="space-y-4">
       {/* Main Media */}
-      <div className="relative aspect-4/5 w-full overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-4/5 w-full overflow-hidden rounded-lg bg-muted cursor-pointer group" onClick={openModal}>
         {selectedMedia.type === 'video' ? (
           <video
             src={selectedMedia.src}
             controls
             className="w-full h-full object-cover"
             poster={images[0]} // Use first image as poster if available
+            onClick={(e) => e.stopPropagation()} // Prevent modal from opening when clicking video controls
           >
             Your browser does not support the video tag.
           </video>
         ) : (
-          <Image
-            src={selectedMedia.src}
-            alt={`${productName} - Main view`}
-            fill
-            className="object-cover transition-transform duration-300 ease-in-out hover:scale-105"
-            priority
-          />
+          <>
+            <Image
+              src={selectedMedia.src}
+              alt={`${productName} - Main view`}
+              fill
+              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+              priority
+            />
+            {/* Overlay hint */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 text-black px-3 py-1 rounded-full text-sm font-medium">
+                Click to view full size
+              </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -86,6 +100,16 @@ export default function ProductImageGallery({ images, productName, video }: Prod
           ))}
         </div>
       )}
+      
+      {/* Full-screen Image Viewer Modal */}
+      <ImageViewerModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        images={images}
+        initialIndex={selectedImageIndex}
+        productName={productName}
+        video={video}
+      />
     </div>
   )
 }

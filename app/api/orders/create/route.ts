@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       totalPrice,
       location,
       status: "Pending",
+      isGuest: false,
     })
 
     return NextResponse.json({ message: "Order created successfully", orderId: order._id }, { status: 201 })

@@ -868,7 +868,12 @@ function AdminOrders() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <CardTitle className="text-sm font-mono">#{order._id.slice(-8)}</CardTitle>
-                    <CardDescription>{order.userId?.name || "Unknown Customer"}</CardDescription>
+                    <CardDescription>
+                      {order.isGuest 
+                        ? `${order.guestInfo?.name || "Guest"} (Guest)`
+                        : order.userId?.name || "Unknown Customer"
+                      }
+                    </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="font-medium">
@@ -893,8 +898,19 @@ function AdminOrders() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Location</p>
-                    <p className="text-sm">{order.location}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {order.isGuest ? "Customer Info" : "Location"}
+                    </p>
+                    {order.isGuest ? (
+                      <div className="text-sm space-y-1">
+                        <p><strong>Name:</strong> {order.guestInfo?.name}</p>
+                        <p><strong>Phone:</strong> {order.guestInfo?.phone}</p>
+                        <p><strong>Email:</strong> {order.guestInfo?.email}</p>
+                        <p><strong>Address:</strong> {order.guestInfo?.address}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm">{order.location}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Order Date</p>
