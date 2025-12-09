@@ -265,9 +265,7 @@ export default function Cart() {
                         Continue as Guest
                       </button>
                       
-                      <div className="text-xs text-muted-foreground text-center p-3 bg-muted/50 rounded">
-                        💡 Your cart is saved locally on this device and will persist until you complete your order or clear your browser data.
-                      </div>
+                      
                     </div>
                   </div>
                 ) : (
