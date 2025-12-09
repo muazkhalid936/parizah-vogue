@@ -176,7 +176,7 @@ export default function Cart() {
                     <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-primary mb-4">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="text-lg font-bold text-primary mb-4">৳{(item.price * item.quantity).toFixed(2)}</p>
                     <button
                       onClick={() => removeItem(index)}
                       className="text-red-600 hover:text-red-700 text-sm font-medium"
@@ -197,7 +197,7 @@ export default function Cart() {
               <div className="space-y-3 mb-6 pb-6 border-b border-border">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>৳{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
@@ -207,7 +207,7 @@ export default function Cart() {
 
               <div className="flex justify-between mb-6 text-lg font-bold">
                 <span>Total</span>
-                <span className="text-primary">${total.toFixed(2)}</span>
+                <span className="text-primary">৳{total.toFixed(2)}</span>
               </div>
             </div>
 

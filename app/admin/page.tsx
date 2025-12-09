@@ -710,7 +710,7 @@ function AdminProducts() {
                     
                     <div className="flex flex-wrap gap-2 items-center">
                       <Badge variant="secondary" className="font-medium">
-                        ${product.price}
+                        ৳{product.price}
                       </Badge>
                       <Badge variant="outline">
                         Stock: {product.stock}
@@ -877,7 +877,7 @@ function AdminOrders() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="font-medium">
-                      ${order.totalPrice.toFixed(2)}
+                      ৳{order.totalPrice.toFixed(2)}
                     </Badge>
                     <Select
                       value={order.status}
@@ -924,7 +924,7 @@ function AdminOrders() {
                     {order.items.map((item: any, idx: number) => (
                       <div key={idx} className="flex justify-between text-sm">
                         <span>{item.name} × {item.quantity}</span>
-                        <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-medium">৳{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>

@@ -109,7 +109,7 @@ export default function Shop() {
 
               {/* Price Filter */}
               <div>
-                <h4 className="font-medium mb-3">Price: ${priceFilter}</h4>
+                <h4 className="font-medium mb-3">Price: ৳{priceFilter}</h4>
                 <input
                   type="range"
                   min="0"
@@ -155,7 +155,7 @@ export default function Shop() {
                       <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
                       <p className="text-muted-foreground text-sm mb-4 capitalize">{product.category}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold text-primary">${product.price}</span>
+                        <span className="text-2xl font-bold text-primary">৳{product.price}</span>
                         <Link
                           href={`/product/${product._id}`}
                           className="bg-secondary text-secondary-foreground px-4 py-2 rounded hover:bg-primary hover:text-primary-foreground transition text-sm"

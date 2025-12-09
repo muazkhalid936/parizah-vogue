@@ -101,7 +101,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
               </span>
             </div>
             <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
-            <p className="text-3xl text-primary font-bold mb-6">${product.price}</p>
+            <p className="text-3xl text-primary font-bold mb-6">৳{product.price}</p>
             <p className="text-muted-foreground mb-8 leading-relaxed">{product.description}</p>
 
             {/* Size Selection */}

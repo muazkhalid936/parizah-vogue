@@ -111,7 +111,7 @@ function ProductSection({
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-lg sm:text-xl font-bold text-primary">
-                    ${product.price}
+                    ৳{product.price}
                   </span>
                   <Link
                     href={`/product/${product._id}`}

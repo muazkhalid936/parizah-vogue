@@ -103,7 +103,7 @@ export default function Orders() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Total</p>
-                    <p className="font-semibold text-primary">${order.totalPrice.toFixed(2)}</p>
+                    <p className="font-semibold text-primary">৳{order.totalPrice.toFixed(2)}</p>
                   </div>
                 </div>
                 <div className="pt-4 border-t border-border">
