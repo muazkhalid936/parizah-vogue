@@ -102,6 +102,38 @@ src/
 - **Scalable** - MongoDB for flexible data storage
 - **Professional** - Clean UI with smooth transitions and hover effects
 
+## SEO Optimization
+
+This app includes comprehensive SEO optimizations:
+
+### Meta Tags & Open Graph
+- Dynamic meta titles and descriptions in Bengali and English
+- Open Graph tags for social media sharing
+- Twitter Card support
+- Proper language tags (lang="bn")
+
+### Structured Data (JSON-LD)
+- Product schema for individual product pages
+- Organization schema for homepage
+- Rich snippets for better search results
+
+### Technical SEO
+- Automatic sitemap generation with `next-sitemap`
+- Robots.txt generation
+- Proper canonical URLs
+- Mobile-friendly responsive design
+- Fast loading with Next.js optimization
+
+### Content Optimization
+- Bengali keywords for local search
+- Product descriptions optimized for search
+- Category-based URL structure
+- Alt text for all product images
+
+### Search Keywords
+Primary keywords: পাকিস্তান ড্রেস, আমদানিকৃত ড্রেস, বাংলাদেশ ফ্যাশন
+Secondary keywords: পার্টি ড্রেস, শাড়ি, উচ্চমানের কাপড়, Parizah Vogue
+
 ## Deployment
 
 Deploy to Vercel:

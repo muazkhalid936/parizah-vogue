@@ -81,13 +81,46 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-6xl mx-auto px-6">
-        <Link href="/shop" className="text-primary hover:text-accent mb-8 inline-block">
-          ← Back to Shop
-        </Link>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "description": product.description,
+            "image": product.images,
+            "offers": {
+              "@type": "Offer",
+              "price": product.price,
+              "priceCurrency": "BDT",
+              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "Parizah Vogue"
+              }
+            },
+            "brand": {
+              "@type": "Brand",
+              "name": "Parizah Vogue"
+            },
+            "category": product.category,
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.5", // You can make this dynamic if you have ratings
+              "reviewCount": "100"
+            }
+          }),
+        }}
+      />
+      <div className="min-h-screen bg-background py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <Link href="/shop" className="text-primary hover:text-accent mb-8 inline-block">
+            ← Back to Shop
+          </Link>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Images */}
           <div>
             <ProductImageGallery images={product.images} productName={product.name} video={product.video} />
@@ -162,5 +195,6 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         </div>
       </div>
     </div>
+    </>
   )
 }
