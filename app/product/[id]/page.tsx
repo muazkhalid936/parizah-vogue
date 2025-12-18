@@ -38,7 +38,11 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         }
         const data = await response.json()
         setProduct(data)
-        setSelectedSize(data.sizes[0] || "M") // Set default to first size
+        if (data.category !== "unstitched") {
+          setSelectedSize(data.sizes[0] || "M") // Set default to first size for stitched products
+        } else {
+          setSelectedSize("") // No size for unstitched
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load product")
       } finally {
@@ -138,24 +142,26 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
             <p className="text-muted-foreground mb-8 leading-relaxed">{product.description}</p>
 
             {/* Size Selection */}
-            <div className="mb-8">
-              <h3 className="font-semibold mb-4">Select Size</h3>
-              <div className="grid grid-cols-4 gap-3">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`py-2 rounded border transition ${
-                      selectedSize === size
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card border-border hover:border-primary"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+            {product.category !== "unstitched" && (
+              <div className="mb-8">
+                <h3 className="font-semibold mb-4">Select Size</h3>
+                <div className="grid grid-cols-4 gap-3">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`py-2 rounded border transition ${
+                        selectedSize === size
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-card border-border hover:border-primary"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Quantity */}
             <div className="mb-8">

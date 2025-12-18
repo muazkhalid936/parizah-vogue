@@ -113,7 +113,7 @@ export default function Shop() {
                 <input
                   type="range"
                   min="0"
-                  max="200"
+                  max="50000"
                   value={priceFilter}
                   onChange={(e) => setPriceFilter(Number(e.target.value))}
                   className="w-full"
@@ -128,7 +128,7 @@ export default function Shop() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => (
                   <div
-                    key={product.id}
+                    key={product._id}
                     className="bg-card border border-border rounded overflow-hidden hover:shadow-lg transition"
                   >
                     <div className="h-64 bg-muted relative">

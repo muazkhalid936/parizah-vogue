@@ -10,6 +10,7 @@ interface CartItem {
   id: string
   name: string
   price: number
+  category: "stitched" | "unstitched" | "party"
   selectedSize: string
   quantity: number
 }
@@ -172,7 +173,9 @@ export default function Cart() {
                 <div key={index} className="bg-card border border-border rounded p-6 flex items-center justify-between">
                   <div className="flex-1">
                     <h3 className="font-semibold mb-2">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Size: {item.selectedSize}</p>
+                    {item.category !== "unstitched" && (
+                      <p className="text-sm text-muted-foreground mb-2">Size: {item.selectedSize}</p>
+                    )}
                     <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                   </div>
                   <div className="text-right">
