@@ -27,6 +27,8 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
   const [error, setError] = useState<string | null>(null)
   const [selectedSize, setSelectedSize] = useState("M")
   const [quantity, setQuantity] = useState(1)
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+  const [relatedLoading, setRelatedLoading] = useState(false)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -52,6 +54,34 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
 
     fetchProduct()
   }, [])
+
+  useEffect(() => {
+    // Fetch related products in the same category once product is loaded
+    const controller = new AbortController()
+    ;(async () => {
+      if (!product) return
+      try {
+        setRelatedLoading(true)
+        const url = `/api/products?category=${encodeURIComponent(product.category)}`
+        const res = await fetch(url, { signal: controller.signal })
+        if (!res.ok) {
+          setRelatedProducts([])
+          return
+        }
+        const data: Product[] = await res.json()
+        // Exclude current product and limit to 8
+        const filtered = data.filter((p) => p._id !== product._id).slice(0, 8)
+        setRelatedProducts(filtered)
+      } catch (err) {
+        if ((err as any)?.name === "AbortError") return
+        console.error("Failed to fetch related products:", err)
+        setRelatedProducts([])
+      } finally {
+        setRelatedLoading(false)
+      }
+    })()
+    return () => controller.abort()
+  }, [product])
 
   const handleAddToCart = () => {
     if (!product) return
@@ -198,6 +228,51 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
               Continue Shopping
             </Link>
           </div>
+        </div>
+        {/* Related Products */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+          {relatedLoading ? (
+            <div className="text-muted-foreground">Loading related products...</div>
+          ) : relatedProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((rp) => (
+                <div
+                  key={rp._id}
+                  className="bg-card border border-border rounded overflow-hidden hover:shadow-lg transition"
+                >
+                  <div className="h-48 bg-muted relative">
+                    {rp.images && rp.images.length > 0 ? (
+                      <div
+                        className="h-48 w-full bg-center bg-cover"
+                        style={{ backgroundImage: `url('${rp.images[0]}')` }}
+                      />
+                    ) : (
+                      <div
+                        className="h-48 w-full bg-center bg-cover"
+                        style={{ backgroundImage: `url('/placeholder.svg?height=192&width=192')` }}
+                      />
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-base font-semibold mb-1">{rp.name}</h3>
+                    <p className="text-muted-foreground text-xs mb-3 capitalize">{rp.category}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-primary">৳{rp.price}</span>
+                      <Link
+                        href={`/product/${rp._id}`}
+                        className="bg-secondary text-secondary-foreground px-3 py-2 rounded hover:bg-primary hover:text-primary-foreground transition text-xs"
+                      >
+                        View
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-muted-foreground">No related products found.</div>
+          )}
         </div>
       </div>
     </div>
